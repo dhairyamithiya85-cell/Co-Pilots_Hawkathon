@@ -1,0 +1,92 @@
+# ─────────────────────────────────────────
+# Offroad Segmentation – Training Config
+# ─────────────────────────────────────────
+
+# Dataset
+dataset:
+  train_images: dataset/train/images
+  train_masks:  dataset/train/masks
+  val_images:   dataset/val/images
+  val_masks:    dataset/val/masks
+  test_images:  dataset/testImages
+  image_size:   384          # reduced from 512 for 4GB VRAM
+
+# Class mapping  (raw label IDs → contiguous 0-based indices)
+classes:
+  num_classes: 10
+  id_to_index:
+    100:   0   # Trees
+    200:   1   # Lush Bushes
+    300:   2   # Dry Grass
+    500:   3   # Dry Bushes
+    550:   4   # Ground Clutter
+    600:   5   # Flowers
+    700:   6   # Logs
+    800:   7   # Rocks
+    7100:  8   # Landscape
+    10000: 9   # Sky
+
+  names:
+    - Trees
+    - Lush Bushes
+    - Dry Grass
+    - Dry Bushes
+    - Ground Clutter
+    - Flowers
+    - Logs
+    - Rocks
+    - Landscape
+    - Sky
+
+  # High-contrast BGR colours for visualisation
+  palette:
+    - [34,  139, 34 ]   # Trees        – forest green
+    - [0,   200, 0  ]   # Lush Bushes  – bright green
+    - [210, 180, 140]   # Dry Grass    – tan
+    - [139, 90,  43 ]   # Dry Bushes   – brown
+    - [160, 82,  45 ]   # Gnd Clutter  – sienna
+    - [255, 20,  147]   # Flowers      – deep pink
+    - [101, 67,  33 ]   # Logs         – dark brown
+    - [128, 128, 128]   # Rocks        – grey
+    - [194, 178, 128]   # Landscape    – sand
+    - [135, 206, 235]   # Sky          – sky blue
+
+# Model
+model:
+  architecture: unet        # switched to UNet - works fine on 4GB GPU
+  backbone:     b0           # not used by unet, kept for reference
+  pretrained:   false        # unet trains from scratch
+
+# Training
+training:
+  epochs:        50
+  batch_size:    4           # reduced from 8 for 4GB VRAM
+  num_workers:   2
+  learning_rate: 0.0001
+  weight_decay:  0.01
+  scheduler:     cosine
+  warmup_epochs: 3
+
+  # Combined loss weights
+  ce_weight:   0.5
+  dice_weight: 0.5
+
+  # Augmentation
+  augmentation:
+    horizontal_flip: true
+    vertical_flip:   false
+    random_crop:     true
+    color_jitter:    true
+    random_rotate:   true
+
+# Paths
+paths:
+  checkpoints: checkpoints/
+  logs:        logs/
+  outputs:     outputs/predictions/
+  metrics:     outputs/metrics/
+
+# Misc
+seed:         42
+device:       cuda          # cuda | cpu
+mixed_precision: true       # use torch.cuda.amp
